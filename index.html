@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+    <head>
+	<meta charset="UTF-8">
+	<title>ajax sample</title>
+        <style>
+               ul,li {
+	         list-style: none;
+		 padding: 0;
+	       }   	
+	       li {
+	         border: 1px solid pink;
+		 line-height: 3em;
+		 margin:10px;
+		 font-size: 14px;
+		 text-align: center;
+		 border-radius:2px;
+	       }
+	       div{text-align:center;}
+	       button {
+	         border: 1px solid #ddd;
+		 border-radius: 2px;
+		 line-height: 3em;
+		 background-color: #fff;
+		 font-weight: 700;
+		 color: pink;
+		 outline:none;
+	       }
+	       li:hover,button:hover {
+	         box-shadow:inset 0 0 5px 1px #ddd;
+	       }
+	</style>
+    </head>
+    <body>
+	<ul>
+		<li>内容1</li>
+		<li>内容2</li>
+	</ul>
+	<div><button>LOAD MORE</button></div>
+    </body>
+    <script>
+        function ajax(url, json, onSuccess, onError){
+	    var xhr = new XMLHttpRequest()
+	    var arr = []
+	    for (key in json) {
+	        arr.push(key + '=' + json[key])
+	    }
+	    url = url + '?' + arr.join('&')
+	    xhr.open('get', url)
+	    xhr.onreadystatechange = function() {
+	        if(xhr.readyState === 4){
+		    if(xhr.status >=200 && xhr.status < 300 || xhr.status === 304){
+			console.log(this.response)
+		        onSuccess(JSON.parse(this.response))
+		    }else onError && onError()
+		}	
+	    }
+            xhr.send()
+	}
+	var btn = document.querySelector('button')
+	var ajaxLock = false    //设置锁
+        var ul = document.querySelector('ul')
+	    var currentIndex = 3
+	    var length = 5
+	btn.addEventListener('click', function(e){
+	    e.preventDefault()
+	    btn.innerText='Loading...'
+	    if(ajaxLock) {
+	        return
+	    }
+	    ajaxLock = true
+	    ajax('/loadMore',{
+	        index: currentIndex,
+		length: length
+	    },function(data){
+	        loading(data)
+		ajaxLock = false
+                currentIndex += length
+	    },function(){alert('出错了')}
+	    )
+	})
+	function loading(data){
+            for(i=0;i<data.length;i++){
+	        var li = document.createElement('li');
+		li.innerText=data[i]
+	        ul.appendChild(li)}
+	        btn.innerText='Load More'
+	}
+
+    </script>
+</html>
